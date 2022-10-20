@@ -4,10 +4,10 @@ import express, { Request, Response } from 'express';
 // import { connectDb } from './repository/db';
 
 const { Client } = require('pg');
-
+let client = new Client()
 export const connectDb = async () => {
   try {
-    const client = new Client({
+    client = new Client({
       user: 'postgres',
       host: 'localhost',
       database: 'testDB',
@@ -20,7 +20,7 @@ export const connectDb = async () => {
     
     
     console.log(res);
-    await client.end();
+    // await client.end();
   } catch (error) {
     console.log(error);
   }
