@@ -21,6 +21,9 @@ export const connectDb = async () => {
       database: 'd6qbfami27jt4t',
       password: '6b3ae6dba743dc111e24b7204d7977128392e99eade90cf24c90b299e6f00f0d',
       port: 5432,
+      ssl: {
+        rejectUnauthorized: false,
+      }
     });
     
     await client.connect();
@@ -53,7 +56,7 @@ const startApp = async () => {
   app.get('/', async (req, res) => {
     
     let query = 'SELECT * FROM main'
-
+    console.log(query)
 // фильтрация
     let filterOrder = ``
     let filterTitle = req.query.filterTitle as string;
