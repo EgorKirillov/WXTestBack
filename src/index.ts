@@ -11,10 +11,15 @@ let client = new Client()
 export const connectDb = async () => {
   try {
     client = new Client({
-      user: 'postgres',
-      host: 'localhost',
-      database: 'testDB',
-      password: 'sa',
+      // user: 'postgres',
+      // host: 'localhost',
+      // database: 'testDB',
+      // password: 'sa',
+      // port: 5432,
+      user: 'ddlfvhwbwhxogm',
+      host: 'ec2-63-32-248-14.eu-west-1.compute.amazonaws.com',
+      database: 'd6qbfami27jt4t',
+      password: '6b3ae6dba743dc111e24b7204d7977128392e99eade90cf24c90b299e6f00f0d',
       port: 5432,
     });
     
@@ -22,7 +27,8 @@ export const connectDb = async () => {
     // let res = await client.query('SELECT * FROM main');
     
     
-    // console.log(res);
+     // console.log(res);
+     console.log('db connect');
     // await client.end();
   } catch (error) {
     console.log(error);
@@ -38,7 +44,7 @@ const port = process.env.PORT || 5000;
 
 const startApp = async () => {
   await connectDb();
-  console.log('db connect');
+  // console.log('db connect');
   app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
   });
