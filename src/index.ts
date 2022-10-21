@@ -1,9 +1,6 @@
 import express, {Request, Response} from 'express';
 import cors from 'cors';
 import bodyParser from 'body-parser';
-// import { connectDb } from './repository/db';
-
-
 const {Client} = require('pg');
 
 let client = new Client()
@@ -27,17 +24,11 @@ export const connectDb = async () => {
     });
     
     await client.connect();
-    // let res = await client.query('SELECT * FROM main');
-    
-    
-     // console.log(res);
-     console.log('db connect');
     // await client.end();
   } catch (error) {
     console.log(error);
   }
 };
-
 
 const app = express();
 app.use(bodyParser.json())
@@ -47,7 +38,6 @@ const port = process.env.PORT || 5000;
 
 const startApp = async () => {
   await connectDb();
-  // console.log('db connect');
   app.listen(port, () => {
     console.log(`Example app listening on port ${port}`);
   });
@@ -56,7 +46,7 @@ const startApp = async () => {
   app.get('/', async (req, res) => {
     
     let query = 'SELECT * FROM main'
-    console.log(query)
+    
 // фильтрация
     let filterOrder = ``
     let filterTitle = req.query.filterTitle as string;
@@ -81,19 +71,12 @@ const startApp = async () => {
           break
         }
       }
-      console.log(`${filterTitle} ${method}`)
       filterOrder = ` WHERE ${filterTitle} ${method}`
+      //не смог красиво сделать условие в sql запросах
       if (filterTitle === 'date' && filterMethod === 'equal' && !!filterValue) {
         filterOrder = ` WHERE DATE(date) = '${filterValue}'`
       }
       query = query + filterOrder
-      console.log(query)
-    }
-    
-    //не смог красиво сделать условие в sql запросах
-    if (filterTitle === 'date' && filterMethod === 'equal' && !!filterValue) {
-      query = `SELECT * FROM main WHERE DATE(date) = '${filterValue}'`
-      
     }
     
     
@@ -102,8 +85,6 @@ const startApp = async () => {
     if (sortTitle) {
       let sortType = (sortTitle.substring(0, 1) === '1') ? 'ASC' : 'DESC'
       let sortColumn = sortTitle.substring(1)
-      console.log('sort type :' + sortType)
-      console.log('sort column :' + sortColumn)
       query = query + ` ORDER BY ${sortColumn} ${sortType}`
     }
     
@@ -111,44 +92,25 @@ const startApp = async () => {
     const currentPage = Number(req.query.currentPage) || 1;
     const pageSize = Number(req.query.pageSize) || 4;
     query += ` LIMIT ${pageSize} OFFSET ${(currentPage - 1) * pageSize} `
-    console.log(query)
     
-    
-    // получение с сервера
+    // получение с сервера общего количества строк
     let totalCount = await client.query(`SELECT COUNT(*) FROM main ${filterOrder}`)
-    console.log(totalCount)
     
-    console.log(+totalCount.rows[0].count)
-    
-    let rrr = await client.query(query)
-    // let books = await db.books.find({}).toArray();
-    // const data = await client.query('SELECT * FROM ');
-    
-    
+    let resp = await client.query(query)
     let data = {
-      pageSize: rrr.rowCount,
+      pageSize: resp.rowCount,
       currentPage: currentPage,
-      items: rrr.rows,
+      items: resp.rows,
       totalCount: +totalCount.rows[0].count
     }
-    res.send(data)
-    // res.send(rrr)
+    res.status(200).send(data)
   })
   
-  
-  app.post('/', async (req, res) => {
-    
-    let rrr = await client.query('SELECT * FROM main')
-    // let books = await db.books.find({}).toArray();
-    let dataID = 8
-    let dataDate = "2003-01-03T21:00:00.000Z"
-    let dataName = "newName"
-    let dataCount = 199
-    let dataDistance = 122159
-    // await client.query(`INSERT INTO main (id, date, name, count, distance) VALUES (${dataID}, ${dataDate}, ${dataName}, ${dataCount}, ${dataDistance});`);
-    await client.query(`INSERT INTO main ( id, date, name, count, distance) VALUES ( 8, ${new Date()}, "vasya", 199, 100500);`);
-    res.send('row created')
-    // res.send(rrr)
-  })
 };
-startApp();
+
+try {
+  startApp();
+}
+catch (e) {
+  console.log(e)
+}
